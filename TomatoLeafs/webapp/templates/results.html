@@ -1,0 +1,68 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+
+<div class="container">
+    <div class="jumbotron" align="center">
+        <div class="container text-center">
+            <div class="row justify-content-md-center">
+                <div class="col col-lg-5">
+                    <img class="ResImg" src="{{ image }}" width="500" height="500">
+                </div>
+                <div class="col" id="resultDiv">
+                    <h1 style="font-size: 50px;"><img src="{{ url_for('static', filename='images/smart_tomato.png') }}" width="75" height="75">
+                        Results ({{ healthy_num + diseased_num}}):</h1>
+                    <hr>
+
+                    {% if status == "Healthy" or  status == "Mostly Healthy" %}
+                        <h3>Status: {{ status }} <img src="{{ url_for('static', filename='images/happy_tomato.png') }}" width="50" height="50"></h3>
+                    {% else %}
+                        <h3>Status: {{ status }} <img src="{{ url_for('static', filename='images/tomato_with_mask.png') }}" width="50" height="50"></h3>
+                    {% endif %}
+                    <h3>Number of healthy leafs: {{ healthy_num }}</h3>
+                    <h3>Number of diseased leafs: {{ diseased_num }}</h3>
+                    <h3>Percentage of healthy leafs: {{ healthy_perc }}%</h3>
+                    <h3>Most common: {{ most_common }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="tipsSection">
+            <hr>
+            <h2 align="left" style="font-size: 40px;">Here you can read some tips
+                <img src="{{ url_for('static', filename='images/book_tomato.png') }}" width="70" height="70"></h2>
+            <br>
+            <div class="accordion" id="accordionFlushExample">
+                {% for content in full_content_list %}
+                    {% set className = content[0] %}
+                    {% set index = content[1] %}
+                    {% set description = content[2] %}
+
+                    <div class="accordion-item" style="background-color: #e07a5f;">
+                        <h2 class="accordion-header" id="flush-heading{{ index }}">
+                            <button style="background-color: #bc4749; color: white;" class="accordion-button collapsed"
+                                    type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapse{{ index }}"
+                                    aria-expanded="false" aria-controls="flush-collapse{{ index }}">
+
+                                {{ className }}
+                            </button>
+                        </h2>
+                        <div id="flush-collapse{{ index }}" class="accordion-collapse collapse"
+                             aria-labelledby="flush-heading{{ index }}" data-bs-parent="#accordionFlushExample"
+                             align="left" style="border-radius: 10px;">
+
+                            <div class="accordion-body" style="color: white;">
+                                {% for sent in description %}
+                                    {{ sent }}
+                                    <br>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock content %}

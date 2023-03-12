@@ -1,0 +1,48 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="jumbotron" align="center">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <h1 style="font-size: 50px;">Check your tomato leafs condition <img src="{{ url_for('static', filename='images/smart_tomato.png') }}"
+        width="80" height="80"></h1>
+
+        <br>
+        <h3>All you need to do is upload a photo</h3>
+        <br>
+
+        <form method="post" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+
+            <fieldset class="form-group">
+                <div class="uploadFileContainer">
+                    {% if form.image.errors %}
+                        {{ form.image(class = 'form-control is-invalid') }}
+
+                        {% for error in form.image.errors%}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+
+                    {% else %}
+                        <div>
+                            {{ form.image(class = 'form-control')}}
+                        </div>
+                    {% endif %}
+                    <br>
+                    <br>
+                    {{ form.submit(class='submitButton') }}
+                </div>
+            </fieldset>
+
+        </form>
+    </div>
+</div>
+{% endblock content %}
