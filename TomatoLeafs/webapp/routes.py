@@ -19,50 +19,52 @@ def home():
     form = MainForm()
 
     if not app.config["TESTING"]:
+        val_mode = 0
         form_validation = form.validate_on_submit()
     else:
+        val_mode = 1
         form_validation = request.method == 'POST'
 
     if form_validation:
         image_raw = form.image.data
 
         # this if is made to prevent errors when using not allowed file extension in testing mode
-        if os.path.splitext(form.image.data.filename)[1] in (".png", ".jpg", ".jpeg"):
+        if val_mode == 1:
+            if os.path.splitext(form.image.data.filename)[1] not in (".png", ".jpg", ".jpeg"):
+                return {"Status": "File should be png or jpg"}, 400
 
-            img = Image.open(image_raw)
-            img = np.array(img)
-            img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+        img = Image.open(image_raw)
+        img = np.array(img)
+        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
-            detector = Detector(
-                classes_file_path=rf"{MODEL_PATH}/classes.txt",
-                weights_file_path=rf"{MODEL_PATH}/yolov3_training_last.weights",
-                config_file_path=rf"{MODEL_PATH}/yolov3_testing.cfg",
-                confidence_threshold=config.CONFIDENCE_THRESHOLD,
-                nms_threshold=config.NMS_THRESHOLD
-            )
+        detector = Detector(
+            classes_file_path=rf"{MODEL_PATH}/classes.txt",
+            weights_file_path=rf"{MODEL_PATH}/yolov3_training_last.weights",
+            config_file_path=rf"{MODEL_PATH}/yolov3_testing.cfg",
+            confidence_threshold=config.CONFIDENCE_THRESHOLD,
+            nms_threshold=config.NMS_THRESHOLD
+        )
 
-            detections = detector.detect(img)
-            if detections:
-                img, counter, most_common, healthy_num, diseased_num, healthy_perc, status = \
-                    detector.draw_detections(img, detections)
+        detections = detector.detect(img)
+        if detections:
+            img, counter, most_common, healthy_num, diseased_num, healthy_perc, status = \
+                detector.draw_detections(img, detections)
 
-                filename = f"{time()}_processed.png"
-                cv2.imwrite(rf"{config.PROCESSED_IMG_TEMP_PATH}\{filename}", img)
+            filename = f"{time()}_processed.png"
+            cv2.imwrite(rf"{config.PROCESSED_IMG_TEMP_PATH}\{filename}", img)
 
-                session["filename"] = filename
-                session["most_common"] = most_common
-                session["healthy_num"] = healthy_num
-                session["diseased_num"] = diseased_num
-                session["healthy_perc"] = healthy_perc
-                session["status"] = status
-                session["counter"] = counter
+            session["filename"] = filename
+            session["most_common"] = most_common
+            session["healthy_num"] = healthy_num
+            session["diseased_num"] = diseased_num
+            session["healthy_perc"] = healthy_perc
+            session["status"] = status
+            session["counter"] = counter
 
-                del detector
-                return redirect(url_for("result"))
-            else:
-                flash("No leafs were found, try again with different photo", "danger")
-
-        return {"Status": "File should be png or jpg"}, 400
+            del detector
+            return redirect(url_for("result"))
+        else:
+            flash("No leafs were found, try again with different photo", "danger")
 
     return render_template("home.html", form=form)
 
